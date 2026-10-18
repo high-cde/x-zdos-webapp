@@ -1,0 +1,22 @@
+{
+  "name": "ZDOS Web Platform",
+  "version": "0.1.0",
+  "environment": "development",
+  "features": {
+    "missionControl": false,
+    "enterpriseGraph": false,
+    "crm": false,
+    "projects": false,
+    "finance": false,
+    "aiAgents": false,
+    "automations": false,
+    "enterpriseMemory": false,
+    "dsnTrustLayer": false,
+    "payments": false
+  },
+  "security": {
+    "requireAuthentication": true,
+    "auditLog": false,
+    "defaultRole": "viewer"
+  }
+}

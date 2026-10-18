@@ -1,0 +1,23 @@
+{
+  "name": "zdos-web-platform-draft",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "^22.12.0 || ^24.0.0" },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "migrate:up": "node-pg-migrate up -m database/migrations",
+    "migrate:down": "node-pg-migrate down -m database/migrations",
+    "bootstrap:workspace": "node scripts/bootstrap-workspace.js",
+    "provision:member": "node scripts/provision-member.js",
+    "events:prune": "node scripts/prune-events.js"
+  },
+  "dependencies": {
+    "fastify": "^5.6.2",
+    "openid-client": "^6.8.0",
+    "pg": "^8.16.3",
+    "node-pg-migrate": "^8.0.3"
+  }
+}

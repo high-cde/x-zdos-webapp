@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZDOS HYPER-SPECS // zLLM, ZLang Scrypt Maker, OpenClaw ZAI & Neural Connectome</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-void: #020306;
+            --bg-panel: rgba(11, 15, 25, 0.88);
+            --bg-card: rgba(16, 22, 36, 0.92);
+            --bg-code: #04060c;
+            --border-glass: rgba(0, 240, 255, 0.18);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+
+            --neon-cyan: #00f0ff;
+            --neon-green: #00ff9d;
+            --neon-purple: #bd00ff;
+            --neon-pink: #ff2a6d;
+            --neon-amber: #ffaa00;
+            --claw-orange: #ff5500;
+
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b9bb4;
+            --text-muted: #526178;
+
+            --font-sans: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-void);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            line-height: 1.55;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 12% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 35%),
+                radial-gradient(circle at 88% 22%, rgba(255, 85, 0, 0.07) 0%, transparent 38%),
+                radial-gradient(circle at 50% 85%, rgba(189, 0, 255, 0.08) 0%, transparent 45%),
+                linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 34px 34px, 34px 34px;
+        }
+
+        .container { max-width: 1360px; margin: 0 auto; padding: 0 22px; }
+
+        /* Topbar */
+        .topbar {
+            background: rgba(3, 5, 10, 0.92);
+            border-bottom: 1px solid var(--border-glass);
+            backdrop-filter: blur(18px);
+            padding: 13px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .topbar-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .brand-left { display: flex; align-items: center; gap: 14px; }
+        .back-btn {
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--neon-cyan);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-glass);
+            background: rgba(0, 240, 255, 0.06);
+            transition: 0.2s;
+        }
+        .back-btn:hover { background: var(--neon-cyan); color: #000; }
+
+        .page-logo {
+            font-family: var(--font-mono);
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+        }
+        .q-pill {
+            padding: 5px 10px;
+            border-radius: 99px;
+            border: 1px solid var(--border-subtle);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+        }
+        .q-pill.live {
+            border-color: rgba(0, 255, 157, 0.35);
+            color: var(--neon-green);
+            background: rgba(0, 255, 157, 0.08);
+        }
+
+        /* Hero Header */
+        .hero {
+            padding: 42px 0 26px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 28px;
+        }
+        .eyebrow {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--neon-cyan);
+            background: rgba(0, 240, 255, 0.07);
+            border: 1px solid var(--border-glass);
+            padding: 5px 14px;
+            border-radius: 99px;
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 4.2vw, 3.3rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff 0%, #bae6fd 50%, var(--neon-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .hero p {
+            color: var(--text-secondary);
+            max-width: 880px;
+            font-size: 1rem;
+        }
+
+        /* Real-Time Benchmark Strip */
+        .bench-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+        .bench-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-top: 2px solid var(--b-color, var(--neon-cyan));
+            border-radius: 12px;
+            padding: 16px 18px;
+            font-family: var(--font-mono);
+        }
+        .bench-label { font-size: 0.68rem; color: var(--text-secondary); text-transform: uppercase; }
+        .bench-val { font-size: 1.65rem; font-weight: 800; color: var(--text-primary); margin: 4px 0; }
+        .bench-sub { font-size: 0.7rem; color: var(--neon-green); }
+
+        /* Main Bento Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 1024px) {
+            .bento-grid { grid-template-columns: 1fr; }
+        }
+
+        .module-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .card-title {
+            font-size: 1.18rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-badge {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid var(--border-glass);
+            color: var(--neon-cyan);
+        }
+
+        /* Controls & Inputs */
+        .ctrl-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .ctrl-input, .ctrl-select {
+            background: var(--bg-code);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            padding: 9px 12px;
+            border-radius: 8px;
+            outline: none;
+            flex: 1;
+        }
+        .ctrl-input:focus, .ctrl-select:focus { border-color: var(--neon-cyan); }
+
+        .btn-exec {
+            background: rgba(0, 240, 255, 0.14);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.76rem;
+            padding: 9px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .btn-exec:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 18px rgba(0, 240, 255, 0.45);
+        }
+
+        .btn-claw {
+            background: rgba(255, 85, 0, 0.15);
+            border: 1px solid var(--claw-orange);
+            color: var(--claw-orange);
+        }
+        .btn-claw:hover {
+            background: var(--claw-orange);
+            color: #000;
+            box-shadow: 0 0 18px rgba(255, 85, 0, 0.5);
+        }
+
+        .btn-purple {
+            background: rgba(189, 0, 255, 0.15);
+            border: 1px solid var(--neon-purple);
+            color: #e9a8ff;
+        }
+        .btn-purple:hover {
+            background: var(--neon-purple);
+            color: #fff;
+            box-shadow: 0 0 18px rgba(189, 0, 255, 0.5);
+        }
+
+        .terminal-window {
+            background: var(--bg-code);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            height: 210px;
+            overflow-y: auto;
+            color: var(--neon-cyan);
+            line-height: 1.55;
+            white-space: pre-wrap;
+        }
+
+        /* Neural Connectome Canvas */
+        .connectome-wrap {
+            position: relative;
+            background: #03050a;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 230px;
+            margin-bottom: 12px;
+        }
+        #synapse-canvas { width: 100%; height: 100%; display: block; }
+        .connectome-hud {
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--neon-green);
+        }
+
+        .hormone-bars {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+        }
+        .h-box {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--border-subtle);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 99px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .progress-fill { height: 100%; transition: width 0.3s ease; }
+
+        /* ZComm Telemetry Matrix */
+        .zcomm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-top: 10px;
+        }
+        .zcomm-node {
+            background: rgba(4, 7, 14, 0.9);
+            border: 1px solid var(--border-subtle);
+            border-left: 3px solid var(--neon-green);
+            border-radius: 10px;
+            padding: 14px;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+        }
+
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 32px 0;
+            margin-top: 40px;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        footer a { color: var(--neon-cyan); text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+
+    <div role="status" style="padding:12px 18px;background:#7f1d1d;color:#fff;text-align:center;font-weight:700;">Prototipo UI · nessun modello, agente, connettoma, servizio voce o benchmark è collegato. Esempi testuali non eseguibili.</div>
+
+    <div role="status" style="padding:12px 18px;background:#7f1d1d;color:#fff;text-align:center;font-weight:700;">Console dimostrativa · modelli, runtime, agenti, telemetria e servizi ZComm non configurati. I controlli non eseguono workload.</div>
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div class="brand-left">
+                <a href="https://x-zdos.it" class="back-btn">← ZDOS HOME</a>
+                <div class="page-logo">
+                    <span>📊 ZDOS UI demo</span>
+                </div>
+            </div>
+            <div class="quick-badges">
+                <span class="q-pill">AI non configurata</span>
+                <span class="q-pill">Agente disattivato</span>
+                <span class="q-pill">Dataset non collegato</span>
+                <span class="q-pill">Servizio voce non configurato</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Hero -->
+        <header class="hero">
+            <div class="eyebrow">PROTOTIPO INTERFACCIA · INTEGRAZIONI NON CONFIGURATE</div>
+            <h1>Moduli sperimentali e stato reale.</h1>
+            <p>
+                Questa pagina contiene controlli e animazioni dimostrative. Modelli AI, runtime ZLang, agenti, connettoma e servizi voce non sono inclusi o collegati; i valori non vengono misurati.
+            </p>
+        </header>
+
+        <!-- Benchmark Strip -->
+        <section class="bench-strip">
+            <div class="bench-box" style="--b-color: var(--neon-cyan);">
+                <div class="bench-label">zLLM Inference Speed</div>
+                <div class="bench-val" id="metric-toks">Non misurato</div>
+                <div class="bench-sub">Runtime non configurato</div>
+            </div>
+            <div class="bench-box" style="--b-color: var(--neon-purple);">
+                <div class="bench-label">ZVM Bytecode Tick</div>
+                <div class="bench-val">Non misurato</div>
+                <div class="bench-sub">Runtime non presente</div>
+            </div>
+            <div class="bench-box" style="--b-color: var(--claw-orange);">
+                <div class="bench-label">OpenClaw ZAI Actions</div>
+                <div class="bench-val" id="metric-claw">Non configurato</div>
+                <div class="bench-sub">Nessun agente operativo collegato</div>
+            </div>
+            <div class="bench-box" style="--b-color: var(--neon-green);">
+                <div class="bench-label">Connessioni Neurali Attive</div>
+                <div class="bench-val" id="metric-synapses">Non collegato</div>
+                <div class="bench-sub">Grafica decorativa, senza dataset</div>
+            </div>
+            <div class="bench-box" style="--b-color: var(--neon-pink);">
+                <div class="bench-label">ZComm SIP / WebRTC Latency</div>
+                <div class="bench-val">Non misurato</div>
+                <div class="bench-sub">Servizio non configurato</div>
+            </div>
+        </section>
+
+        <!-- ROW 1: zLLM in ZLang + ZLang Scrypt Maker -->
+        <div class="bento-grid">
+
+            <!-- MODULE 1: zLLM IN ZLANG BY ZDOS -->
+            <div class="module-card">
+                <div>
+                    <div class="card-head">
+                        <div class="card-title">
+                            <span>🧠</span>
+                            <span>zLLM in ZLang by ZDOS (Native Neural Engine)</span>
+                        </div>
+                        <span class="card-badge">ZLANG_TENSOR_CORE</span>
+                    </div>
+                    <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:12px;">
+                        Motore LLM scritto e orchestrato direttamente in <strong>ZLang</strong> sopra la ZVM. Nessun wrapper Python lento: inferenza tensoriale deterministica con verifica crittografica di ogni token generato.
+                    </p>
+
+                    <div class="ctrl-row">
+                        <select id="zllm-model" class="ctrl-select">
+                            <option value="zLLM-7B-OmniZLang">zLLM-7B-OmniZLang (Reasoning & Code)</option>
+                            <option value="zLLM-CyberSec-zKR">zLLM-CyberSec-zKR (Threat & Audit)</option>
+                            <option value="zLLM-BioCortex-Fly">zLLM-BioCortex-Fly (Homeostasis Control)</option>
+                        </select>
+                    </div>
+
+                    <div class="ctrl-row">
+                        <input type="text" id="zllm-prompt" class="ctrl-input" value="Ottimizza il routing sinaptico del kernel ZDOS e genera una policy anti-DDoS">
+                        <button class="btn-exec" disabled>Inferenza non disponibile</button>
+                    </div>
+                </div>
+
+            <div class="terminal-window" id="zllm-output">Inferenza non disponibile: nessun modello o runtime configurato.</div>
+            </div>
+
+            <!-- MODULE 2: ZLANG SCRYPT MAKER -->
+            <div class="module-card">
+                <div>
+                    <div class="card-head">
+                        <div class="card-title">
+                            <span>📜</span>
+                            <span>Template testuali (non eseguibili)</span>
+                        </div>
+                        <span class="card-badge" style="color:var(--neon-purple); border-color:var(--neon-purple);">SCRYPT_FORGE_V2</span>
+                    </div>
+                    <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:12px;">
+                        Seleziona un testo d'esempio. Non è un compilatore, non applica policy e non firma codice.
+                    </p>
+
+                    <div class="ctrl-row">
+                        <select id="scrypt-template" class="ctrl-select" onchange="generateZlangScrypt()">
+                            <option value="zkr_heal">🛡️ Scrypt: zKR Auto-Heal & Firewall Default-Deny</option>
+                            <option value="openclaw_mission">🦞 Scrypt: OpenClaw ZAI Autonomous Repo & Web Agent</option>
+                            <option value="zcomm_sip_bridge">📡 Scrypt: ZComm SIP Trunk + CEPT 40x24 Auto-Router</option>
+                            <option value="dsn_faucet_guard">Operazioni di valore (disattivate)</option>
+                            <option value="flywire_reflex">🧬 Scrypt: Cortex OS Drosophila Reflex Arc</option>
+                        </select>
+                        <button class="btn-exec btn-purple" onclick="generateZlangScrypt()">⚙️ GENERA SCRYPT</button>
+                        <button class="btn-exec" onclick="copyScryptCode()">⧉ COPIA</button>
+                    </div>
+                </div>
+
+                <div class="terminal-window" id="scrypt-output" style="color:#f472b6;">// Esempio illustrativo, non verificato e non eseguibile.
+module Example {
+    status: NOT_IMPLEMENTED;
+}</div>
+            </div>
+
+        </div>
+
+        <!-- ROW 2: OpenClaw ZAI + Connessioni Neurali Attive -->
+        <div class="bento-grid">
+
+            <!-- MODULE 3: OPENCLAW ZAI -->
+            <div class="module-card">
+                <div>
+                    <div class="card-head">
+                        <div class="card-title">
+                            <span>🦞</span>
+                            <span>Agente operativo (non configurato)</span>
+                        </div>
+                        <span class="card-badge" style="color:var(--claw-orange); border-color:var(--claw-orange);">OPENCLAW_ENGINE</span>
+                    </div>
+                    <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:12px;">
+                        <strong>Agente non configurato.</strong> Questa UI non esegue comandi, browser, API o operazioni Web3.
+                    </p>
+
+                    <div class="ctrl-row">
+                        <select id="claw-task" class="ctrl-select">
+                            <option value="audit_repo">Missione 01: Scansiona Repo GitHub, correggi bug Rust e apri PR</option>
+                            <option value="scrape_seo">Missione 02: Esegui Audit SEO profondo e sincronizza Lead su xCLOUD</option>
+                            <option value="sec_sweep">Missione 03: Blindatura porte SSH/SIP e rotazione chiavi ZLB2</option>
+                            <option value="dsn_rebalance">Operazione finanziaria (disattivata)</option>
+                        </select>
+                <button class="btn-exec btn-claw" disabled>Agente non configurato</button>
+                    </div>
+                </div>
+
+                <div class="terminal-window" id="openclaw-output" style="color:var(--neon-amber);">Agente non configurato. Nessun comando o missione può essere eseguito.</div>
+            </div>
+
+            <!-- MODULE 4: CONNESSIONI NEURALI ATTIVE (FLYWIRE CONNECTOME) -->
+            <div class="module-card">
+                <div>
+                    <div class="card-head">
+                        <div class="card-title">
+                            <span>🕸️</span>
+                    <span>Grafica decorativa (nessun connectome)</span>
+                        </div>
+                        <span class="card-badge" style="color:var(--neon-green); border-color:var(--neon-green);">DATASET NON COLLEGATO</span>
+                    </div>
+                    <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:10px;">
+                        Mappatura sinaptica bio-mimetica basata sul connettoma <strong>FlyWire</strong>. Ogni richiesta del portale attiva cluster sensoriali, interneuroni di decisione e motoneuroni di esecuzione.
+                    </p>
+
+                    <div class="connectome-wrap">
+                        <div class="connectome-hud">
+                            <span id="hud-cluster">CLUSTER: MUSHROOM_BODY + CENTRAL_COMPLEX</span>
+                            <span id="hud-hz">Misura non disponibile</span>
+                        </div>
+                        <canvas id="synapse-canvas"></canvas>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="hormone-bars">
+                        <div class="h-box">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="color:var(--neon-green);">DOPAMINA (Reward)</span>
+                                <span id="val-dopa">Non misurato</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" id="bar-dopa" style="width:0%; background:var(--neon-green);"></div>
+                            </div>
+                        </div>
+                        <div class="h-box">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="color:var(--neon-pink);">CORTISOLO (Stress)</span>
+                                <span id="val-cort">Non misurato</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" id="bar-cort" style="width:0%; background:var(--neon-pink);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px; display:flex; gap:8px;">
+                        <button class="btn-exec" style="width:100%;" disabled>Simulazione non collegata</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ROW 3: ZCOMM OMNI-PROTOCOL MATRIX -->
+        <section class="module-card" style="margin-bottom: 30px;">
+            <div class="card-head">
+                <div class="card-title">
+                    <span>📡</span>
+                    <span>ZComm Omni-Protocol Stack (SIP VoIP · WebRTC 8K · CEPT 40×24 Videotex)</span>
+                </div>
+                <button class="btn-exec" disabled>Test non disponibile</button>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:12px;">
+                Sezione illustrativa; nessun endpoint SIP, WebRTC, bot o webhook è configurato.
+            </p>
+
+            <div class="zcomm-grid" id="zcomm-matrix">
+                <div class="zcomm-node">
+                    <div style="color:var(--neon-cyan); font-weight:700;">📞 ZComm SIP Trunk</div>
+                    <div style="color:var(--text-secondary); margin-top:4px;">Endpoint non configurato</div>
+                    <div style="color:var(--neon-green); margin-top:4px;" id="zc-stat-1">Non configurato</div>
+                </div>
+                <div class="zcomm-node" style="border-left-color:var(--neon-pink);">
+                    <div style="color:var(--neon-pink); font-weight:700;">🎥 ZComm WebRTC P2P</div>
+                    <div style="color:var(--text-secondary); margin-top:4px;">VelvetHub & Live Stage Mesh</div>
+                    <div style="color:var(--neon-green); margin-top:4px;" id="zc-stat-2">Non misurato</div>
+                </div>
+                <div class="zcomm-node" style="border-left-color:var(--neon-amber);">
+                    <div style="color:var(--neon-amber); font-weight:700;">📺 CEPT 40×24 Videotex</div>
+                    <div style="color:var(--text-secondary); margin-top:4px;">Frame Buffer Deterministico</div>
+                    <div style="color:var(--neon-green); margin-top:4px;" id="zc-stat-3">Non configurato</div>
+                </div>
+                <div class="zcomm-node" style="border-left-color:var(--neon-purple);">
+                    <div style="color:var(--neon-purple); font-weight:700;">Bot & Webhook Bridge</div>
+                    <div style="color:var(--text-secondary); margin-top:4px;">Discord · Telegram · Bitrix24</div>
+                    <div style="color:var(--neon-green); margin-top:4px;" id="zc-stat-4">Non misurato</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div>
+            <strong>ZDOS Supreme Enterprise</strong> · Engineered by <strong>high-cde</strong> ·
+            <a href="https://x-zdos.it">Home</a> ·
+            <a href="https://x-zdos.it/lab.html">ZDOS-lab-v1</a> ·
+            <a href="https://x-zdos.it/xcloud.html">xCLOUD OS</a> ·
+            <a href="https://x-zdos.it/wallet.html">DSN Wallet</a> ·
+            <a href="https://x-zdos.it/velvet.html">VelvetHub 18+</a>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. zLLM in ZLang Inference Engine ---
+        function runZllmInference() {
+            const model = document.getElementById('zllm-model').value;
+            const prompt = document.getElementById('zllm-prompt').value.trim() || 'Status check';
+            const out = document.getElementById('zllm-output');
+            void model;
+            void prompt;
+            out.textContent = 'Inferenza non disponibile: nessun modello è configurato.';
+        }
+
+        // --- 2. ZLang Scrypt Maker ---
+        function generateZlangScrypt() {
+            const tpl = document.getElementById('scrypt-template').value;
+            const out = document.getElementById('scrypt-output');
+            const templates = {
+                zkr_heal: `// Esempio illustrativo, non eseguibile.\nmodule SecurityExample {\n    status: NOT_IMPLEMENTED;\n}`,
+                openclaw_mission: `// Esempio illustrativo; agente e strumenti non configurati.\nmodule AgentExample {\n    status: NOT_CONFIGURED;\n}`,
+                zcomm_sip_bridge: `// Servizi voce non configurati.\nmodule CommunicationsExample {\n    status: NOT_CONFIGURED;\n}`,
+                dsn_faucet_guard: `// Valore e interazioni on-chain disattivati.\nmodule ValueOperations {\n    status: DISABLED;\n}`,
+                flywire_reflex: `// Nessun dataset o worker AI collegato.\nmodule NeuralExample {\n    status: NOT_CONFIGURED;\n}`
+            };
+            out.textContent = templates[tpl] || templates.zkr_heal;
+        }
+
+        function copyScryptCode() {
+            const code = document.getElementById('scrypt-output').textContent;
+            if (!navigator.clipboard?.writeText) return alert('Clipboard non disponibile. Il testo resta un esempio non eseguibile.');
+            navigator.clipboard.writeText(code).then(() => alert('Testo copiato; è un esempio illustrativo non eseguibile.')).catch(() => alert('Copia non riuscita. Il testo resta non eseguibile.'));
+        }
+
+        // --- 3. OpenClaw ZAI Dispatcher ---
+        function dispatchOpenClaw() {
+            const out = document.getElementById('openclaw-output');
+            out.textContent = 'Non disponibile: nessun agente operativo è configurato.';
+        }
+
+        // --- 4. Connessioni Neurali Attive (Canvas Sinaptico) ---
+        const sCanvas = document.getElementById('synapse-canvas');
+        const sCtx = sCanvas.getContext('2d');
+        let pulseBoost = 1;
+
+        function resizeSynapseCanvas() {
+            sCanvas.width = sCanvas.parentElement.clientWidth;
+            sCanvas.height = sCanvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeSynapseCanvas);
+        resizeSynapseCanvas();
+
+        const neurons = [];
+        for (let i = 0; i < 44; i++) {
+            neurons.push({
+                x: Math.random() * sCanvas.width,
+                y: Math.random() * sCanvas.height,
+                vx: (Math.random() - 0.5) * 1.4,
+                vy: (Math.random() - 0.5) * 1.4,
+                r: Math.random() * 2.8 + 1.8,
+                fire: Math.random()
+            });
+        }
+
+        function drawSynapses() {
+            sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
+
+            for (let i = 0; i < neurons.length; i++) {
+                for (let j = i + 1; j < neurons.length; j++) {
+                    const dx = neurons[i].x - neurons[j].x;
+                    const dy = neurons[i].y - neurons[j].y;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d < 95) {
+                        sCtx.strokeStyle = pulseBoost > 1.2
+                            ? `rgba(0, 255, 157, ${1 - d / 95})`
+                            : `rgba(0, 240, 255, ${(1 - d / 95) * 0.75})`;
+                        sCtx.lineWidth = pulseBoost > 1.2 ? 1.4 : 0.8;
+                        sCtx.beginPath();
+                        sCtx.moveTo(neurons[i].x, neurons[i].y);
+                        sCtx.lineTo(neurons[j].x, neurons[j].y);
+                        sCtx.stroke();
+                    }
+                }
+            }
+
+            for (const n of neurons) {
+                n.x += n.vx * pulseBoost;
+                n.y += n.vy * pulseBoost;
+                if (n.x < 0 || n.x > sCanvas.width) n.vx *= -1;
+                if (n.y < 0 || n.y > sCanvas.height) n.vy *= -1;
+
+                sCtx.fillStyle = pulseBoost > 1.2 ? '#00ff9d' : '#00f0ff';
+                sCtx.beginPath();
+                sCtx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+                sCtx.fill();
+            }
+
+            if (pulseBoost > 1) pulseBoost -= 0.02;
+            requestAnimationFrame(drawSynapses);
+        }
+        drawSynapses();
+
+        function stimulateConnectome() {
+            document.getElementById('hud-hz').textContent = 'Dataset non collegato';
+        }
+
+        // --- 5. ZComm Stack Burst Test ---
+        function pingZcommStack() {
+            for (const id of ['zc-stat-1', 'zc-stat-2', 'zc-stat-3', 'zc-stat-4']) document.getElementById(id).textContent = 'Non configurato';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+openapi: 3.0.3
+info:
+  title: ZDOS Web API Draft
+  version: 0.2.0
+  description: Unverified workspace-scoped API draft. Authentication is an Auth0 OIDC session cookie; no live service is implied.
+servers:
+  - url: /
+security:
+  - sessionCookie: []
+paths:
+  /health:
+    get:
+      security: []
+      summary: Readiness check for PostgreSQL and OIDC configuration
+      responses:
+        '200': { description: Ready }
+        '503': { description: Not ready }
+  /auth/login:
+    get:
+      security: []
+      summary: Start Auth0 Authorization Code with PKCE flow
+      responses:
+        '302': { description: Redirect to configured OIDC issuer }
+        '503': { description: Auth0 or PostgreSQL not configured }
+  /auth/callback:
+    get:
+      security: []
+      summary: OIDC callback
+      responses:
+        '302': { description: Authenticated session created }
+        '400': { description: Invalid OIDC transaction }
+        '401': { description: OIDC verification failed }
+        '403': { description: Verified email or workspace membership required }
+  /auth/logout:
+    post:
+      security: []
+      summary: Revoke the current session
+      responses:
+        '204': { description: Session revoked }
+  /api/v1/workspaces/{workspaceId}/missions:
+    parameters:
+      - $ref: '#/components/parameters/workspaceId'
+    get:
+      summary: List missions in the caller's workspace
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [planned, active, blocked, completed, cancelled] }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - name: cursor
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Mission page
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, next_cursor]
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Mission' } }
+                  next_cursor: { type: string, nullable: true }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { description: Workspace not found or not a member }
+    post:
+      summary: Create a planned mission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, domain]
+              additionalProperties: false
+              properties:
+                title: { type: string, minLength: 1, maxLength: 240 }
+                domain: { type: string, minLength: 1, maxLength: 100 }
+                owner_id: { type: string }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Mission' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { description: Insufficient role }
+  /api/v1/workspaces/{workspaceId}/missions/{missionId}:
+    parameters:
+      - $ref: '#/components/parameters/workspaceId'
+      - name: missionId
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      summary: Partially update a mission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              additionalProperties: false
+              properties:
+                title: { type: string, minLength: 1, maxLength: 240 }
+                domain: { type: string, minLength: 1, maxLength: 100 }
+                status: { type: string, enum: [planned, active, blocked, completed, cancelled] }
+                progress: { type: integer, minimum: 0, maximum: 100 }
+                owner_id: { type: string }
+      responses:
+        '200':
+          description: Updated mission
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Mission' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { description: Insufficient role }
+        '404': { description: Mission or workspace not found }
+        '422': { description: Invalid mission state transition }
+  /api/v1/workspaces/{workspaceId}/events:
+    parameters:
+      - $ref: '#/components/parameters/workspaceId'
+    post:
+      summary: Record an append-only workspace event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [event_type]
+              additionalProperties: false
+              properties:
+                event_type: { type: string, minLength: 1, maxLength: 100 }
+                payload: { type: object }
+      responses:
+        '201': { description: Event recorded }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { description: Insufficient role }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: xcloud_session
+  parameters:
+    workspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Unauthorized:
+      description: Authentication required
+  schemas:
+    Mission:
+      type: object
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        title: { type: string }
+        domain: { type: string }
+        status: { type: string, enum: [planned, active, blocked, completed, cancelled] }
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        owner_id: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
