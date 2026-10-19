@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#020305"><link rel="manifest" href="/manifest.webmanifest">
+  <title>Download ufficiale ZDOS Linux</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#020305;color:#f0f4f8;font:16px/1.6 system-ui,sans-serif;display:grid;place-items:center;padding:24px}.card{width:min(760px,100%);padding:clamp(24px,5vw,52px);border:1px solid #00f0ff55;border-radius:20px;background:#0d101acc;box-shadow:0 20px 70px #00f0ff12}a{color:#00f0ff}.brand{font-weight:750;text-decoration:none;letter-spacing:.04em}.eyebrow{margin-top:34px;color:#00ff9d;text-transform:uppercase;letter-spacing:.14em;font-size:.76rem}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:8px 0 16px}p{color:#b8c5d6}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0}.button{display:inline-block;border:1px solid #00f0ff;background:#00f0ff1c;color:#00f0ff;padding:12px 18px;border-radius:9px;font-weight:700;text-decoration:none}.button.alt{border-color:#ffffff44;background:#ffffff08;color:#f0f4f8}.note{font-size:.9rem;border-left:3px solid #ffaa00;padding:10px 14px;background:#ffaa000d}.commands{padding:16px;border-radius:9px;background:#000;font: .88rem/1.7 ui-monospace,monospace;overflow-wrap:anywhere}footer{margin-top:30px;color:#8b9bb4;font-size:.85rem}
+  </style>
+</head>
+<body><main class="card">
+  <a class="brand" href="/">⬡ ZDOS · x-zdos.it</a>
+  <div class="eyebrow">Release ufficiale · x86_64</div>
+  <h1>ZDOS Linux</h1>
+  <p>Scarica la ISO dal repository ufficiale ZDOS. Ogni release pubblicata include il checksum SHA-256 da verificare prima dell’avvio.</p>
+  <div class="actions">
+    <a class="button" href="https://github.com/high-cde/ZDOS/releases/latest/download/zdos-linux-x86_64.iso">Scarica ISO ZDOS ⬇</a>
+    <a class="button alt" href="https://github.com/high-cde/ZDOS/releases/latest/download/SHA256SUMS">Scarica checksum SHA-256</a>
+    <a class="button alt" href="https://github.com/high-cde/ZDOS/releases">Tutte le release</a>
+  </div>
+  <p class="note"><strong>Anteprima:</strong> l’ISO è una distribuzione minimale da avviare in QEMU. Il supporto hardware e l’installer BIOS sono sperimentali; non è un sistema desktop general-purpose.</p>
+  <h2>Verifica e avvio su Ubuntu</h2>
+  <div class="commands">sha256sum -c SHA256SUMS<br>qemu-system-x86_64 -cdrom zdos-linux-x86_64.iso -serial stdio -display none</div>
+  <p>Per build da sorgente, note della release e pacchetto container OCI, consulta il <a href="https://github.com/high-cde/ZDOS">repository ZDOS ufficiale</a>.</p>
+  <footer>Il pulsante scarica solo asset pubblicati nella pagina release GitHub ufficiale.</footer>
+</main></body></html>

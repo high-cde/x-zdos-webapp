@@ -5,9 +5,23 @@ export function readConfig(env = process.env) {
   const databaseConfigured = Boolean(env.DATABASE_URL);
   const authConfigured = requiredAuth.every((key) => Boolean(env[key]));
   const validSecret = (env.SESSION_SECRET?.length ?? 0) >= 32;
-  const validIssuer = !env.AUTH0_ISSUER || /^https:\/\//.test(env.AUTH0_ISSUER);
-  const validBaseUrl = !env.APP_BASE_URL || /^https:\/\//.test(env.APP_BASE_URL) || (!production && /^http:\/\//.test(env.APP_BASE_URL));
+  const localHttpIssuer = !production && /^http:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/.test(env.AUTH0_ISSUER || '');
+  const validIssuer = !env.AUTH0_ISSUER || /^https:\/\//.test(env.AUTH0_ISSUER) || localHttpIssuer;
+  const localHttpBaseUrl = !production && /^http:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/.test(env.APP_BASE_URL || '');
+  const validBaseUrl = !env.APP_BASE_URL || /^https:\/\//.test(env.APP_BASE_URL) || localHttpBaseUrl;
   const authReady = authConfigured && validSecret && validIssuer && validBaseUrl;
+  let organismUrl = null;
+  if (env.ORGANISM_API_BASE_URL) {
+    try { organismUrl = new URL(env.ORGANISM_API_BASE_URL); } catch { throw new Error('ORGANISM_API_BASE_URL must be a valid URL'); }
+    const localEndpoint = ['localhost', '127.0.0.1', '::1', '[::1]'].includes(organismUrl.hostname);
+    if (organismUrl.username || organismUrl.password || organismUrl.search || organismUrl.hash) {
+      throw new Error('ORGANISM_API_BASE_URL must not contain credentials, query parameters, or a fragment');
+    }
+    if (organismUrl.protocol !== 'https:' && !(organismUrl.protocol === 'http:' && !production && localEndpoint)) {
+      throw new Error('ORGANISM_API_BASE_URL must use HTTPS (HTTP is allowed only for loopback in development)');
+    }
+  }
+  const organismConfigured = Boolean(organismUrl && env.ORGANISM_MODEL);
   const retention = Number(env.EVENT_RETENTION_DAYS ?? 365);
   if (!Number.isInteger(retention) || retention < 1 || retention > 3650) throw new Error('EVENT_RETENTION_DAYS must be an integer from 1 to 3650');
   if (production && (!databaseConfigured || !authReady)) throw new Error('Production startup denied: PostgreSQL and complete, valid Auth0 OIDC configuration are required');
@@ -17,6 +31,12 @@ export function readConfig(env = process.env) {
     port: Number(env.PORT || 3000),
     databaseUrl: env.DATABASE_URL || null,
     authReady,
+    selfServiceSignup: env.SELF_SERVICE_SIGNUP === 'true',
+    organism: organismConfigured ? {
+      baseUrl: organismUrl.href.replace(/\/$/, ''),
+      model: env.ORGANISM_MODEL,
+      apiKey: env.ORGANISM_API_KEY || null
+    } : null,
     auth0: authReady ? {
       issuer: env.AUTH0_ISSUER,
       clientId: env.AUTH0_CLIENT_ID,

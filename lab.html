@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZDOS Sovereign Blockchain & Neural Lab</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #100c24 0%, #170d36 50%, #091320 100%);
@@ -135,13 +132,20 @@
 
     <header>
         <div style="display:flex; align-items:center; gap:12px;">
-            <a href="https://x-zdos.it/wallet.html" class="nav-back">← TORNA AL WALLET</a>
+            <a href="/wallet.html" class="nav-back">← TORNA AL WALLET</a>
             <h1 style="font-family:var(--font-brand); font-size:1.2rem; letter-spacing: 0.5px;">⚡ ZDOS BLOCKCHAIN & NEURAL FORGE</h1>
         </div>
         <div style="font-family:var(--font-brand); font-size:0.78rem; color:var(--neon-green); background:rgba(74,222,128,0.1); padding:4px 12px; border-radius:20px; border:1px solid rgba(74,222,128,0.3);">
             ● Runtime ZVM non presente
         </div>
     </header>
+
+    <section class="card" style="margin:16px; border-color:var(--accent-cyan);">
+        <span class="card-title">ZDOS attuale · Zlang / ZLB2</span>
+        <p>Per build e boot reali usa i repository di sistema e linguaggio: ZDOS Linux minimale e prototipo bare metal x86_64 con runtime ZLB2. Questa pagina resta il laboratorio web già esistente e non compila il sorgente.</p>
+        <a href="https://github.com/high-cde/ZDOS">Repository ZDOS ↗</a> ·
+        <a href="https://github.com/high-cde/Zlang">Repository Zlang ↗</a>
+    </section>
 
     <div class="grid">
         <!-- 1. ZLANG JIT PLAYGROUND & VIRTUAL CPU CORE -->
@@ -212,7 +216,7 @@ module Example {
 
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <button class="action-btn" disabled style="background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.4); color: var(--neon-green);">Diagnostica non disponibile</button>
-                <a href="https://x-zdos.it/wallet.html" class="action-btn" style="background: rgba(255,255,255,0.08); color: var(--text-main); text-align: center;">Apri interfaccia wallet demo</a>
+                <a href="/wallet.html" class="action-btn" style="background: rgba(255,255,255,0.08); color: var(--text-main); text-align: center;">Apri interfaccia wallet demo</a>
             </div>
         </div>
     </div>

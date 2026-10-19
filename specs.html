@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/png" href="/devhub24-80.png">
     <title>ZDOS HYPER-SPECS // zLLM, ZLang Scrypt Maker, OpenClaw ZAI & Neural Connectome</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-void: #020306;
@@ -375,9 +374,9 @@
     <header class="topbar">
         <div class="container topbar-inner">
             <div class="brand-left">
-                <a href="https://x-zdos.it" class="back-btn">← ZDOS HOME</a>
+                <a href="/" class="back-btn">← ZDOS HOME</a>
                 <div class="page-logo">
-                    <span>📊 ZDOS UI demo</span>
+                    <span>📊 Stato tecnico</span>
                 </div>
             </div>
             <div class="quick-badges">
@@ -398,6 +397,13 @@
                 Questa pagina contiene controlli e animazioni dimostrative. Modelli AI, runtime ZLang, agenti, connettoma e servizi voce non sono inclusi o collegati; i valori non vengono misurati.
             </p>
         </header>
+
+        <section class="module-card" style="margin-bottom:20px;border-color:rgba(0,240,255,.3)">
+            <div class="card-head"><div class="card-title"><span>🧭</span><span>ZDOS x86_64 · Zlang / ZLB2</span></div><span class="card-badge">REPOSITORY E VERIFICHE</span></div>
+            <p style="font-size:.84rem;color:var(--text-secondary);margin:10px 0">Il repository ZDOS descrive una distro Linux minimale avviabile in QEMU e un prototipo bare metal x86_64 con runtime Zlang. Il compilatore Zlang produce il profilo ZLB2 v2.5 condiviso. I numeri decorativi sotto non sono benchmark.</p>
+            <a href="https://github.com/high-cde/ZDOS" style="color:var(--neon-cyan)">ZDOS ↗</a> ·
+            <a href="https://github.com/high-cde/Zlang" style="color:var(--neon-cyan)">Zlang ↗</a>
+        </section>
 
         <!-- Benchmark Strip -->
         <section class="bench-strip">
@@ -437,32 +443,28 @@
                     <div class="card-head">
                         <div class="card-title">
                             <span>🧠</span>
-                            <span>zLLM in ZLang by ZDOS (Native Neural Engine)</span>
+                            <span>ZDOS Organism · Generative Gateway</span>
                         </div>
-                        <span class="card-badge">ZLANG_TENSOR_CORE</span>
+                        <span class="card-badge">PROVIDER CONFIGURABILE</span>
                     </div>
                     <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:12px;">
-                        Motore LLM scritto e orchestrato direttamente in <strong>ZLang</strong> sopra la ZVM. Nessun wrapper Python lento: inferenza tensoriale deterministica con verifica crittografica di ogni token generato.
+                        Generazione reale tramite endpoint OpenAI-compatible configurato dall’operatore, con accesso autenticato e isolato per workspace. Questo gateway non è un modello nativo ZLang: runtime, pesi e compilatore ZLang non sono presenti in questo repository.
                     </p>
 
                     <div class="ctrl-row">
-                        <select id="zllm-model" class="ctrl-select">
-                            <option value="zLLM-7B-OmniZLang">zLLM-7B-OmniZLang (Reasoning & Code)</option>
-                            <option value="zLLM-CyberSec-zKR">zLLM-CyberSec-zKR (Threat & Audit)</option>
-                            <option value="zLLM-BioCortex-Fly">zLLM-BioCortex-Fly (Homeostasis Control)</option>
-                        </select>
+                        <input type="text" id="organism-workspace" class="ctrl-input" maxlength="100" placeholder="ID workspace invitato">
                     </div>
 
                     <div class="ctrl-row">
-                        <input type="text" id="zllm-prompt" class="ctrl-input" value="Ottimizza il routing sinaptico del kernel ZDOS e genera una policy anti-DDoS">
-                        <button class="btn-exec" disabled>Inferenza non disponibile</button>
+                        <textarea id="zllm-prompt" class="ctrl-input" maxlength="6000" rows="3" placeholder="Scrivi una richiesta per ZDOS Organism">Analizza questo problema e distingui i fatti dalle ipotesi.</textarea>
+                        <button class="btn-exec" id="organism-run" type="button" onclick="runZllmInference()">GENERA</button>
                     </div>
                 </div>
 
-            <div class="terminal-window" id="zllm-output">Inferenza non disponibile: nessun modello o runtime configurato.</div>
+            <div class="terminal-window" id="zllm-output" aria-live="polite">Gateway non verificato. Configura ORGANISM_API_BASE_URL e ORGANISM_MODEL sul server; per generare serve un account e l’accesso al workspace.</div>
             </div>
 
-            <!-- MODULE 2: ZLANG SCRYPT MAKER -->
+            <!-- MODULE 2: ESEMPI TESTUALI -->
             <div class="module-card">
                 <div>
                     <div class="card-head">
@@ -487,6 +489,7 @@
                         <button class="btn-exec btn-purple" onclick="generateZlangScrypt()">⚙️ GENERA SCRYPT</button>
                         <button class="btn-exec" onclick="copyScryptCode()">⧉ COPIA</button>
                     </div>
+                    <div id="scrypt-copy-status" role="status" aria-live="polite" style="font-size:0.78rem;color:var(--text-secondary);margin-top:8px;"></div>
                 </div>
 
                 <div class="terminal-window" id="scrypt-output" style="color:#f472b6;">// Esempio illustrativo, non verificato e non eseguibile.
@@ -622,23 +625,57 @@ module Example {
     <footer>
         <div>
             <strong>ZDOS Supreme Enterprise</strong> · Engineered by <strong>high-cde</strong> ·
-            <a href="https://x-zdos.it">Home</a> ·
-            <a href="https://x-zdos.it/lab.html">ZDOS-lab-v1</a> ·
-            <a href="https://x-zdos.it/xcloud.html">xCLOUD OS</a> ·
-            <a href="https://x-zdos.it/wallet.html">DSN Wallet</a> ·
-            <a href="https://x-zdos.it/velvet.html">VelvetHub 18+</a>
+            <a href="/">Home</a> ·
+            <a href="/lab.html">ZDOS-lab-v1</a> ·
+            <a href="/xcloud.html">xCLOUD OS</a> ·
+            <a href="/wallet.html">DSN Wallet</a> ·
+            <a href="/velvet.html">VelvetHub 18+</a>
         </div>
     </footer>
 
     <script>
         // --- 1. zLLM in ZLang Inference Engine ---
-        function runZllmInference() {
-            const model = document.getElementById('zllm-model').value;
-            const prompt = document.getElementById('zllm-prompt').value.trim() || 'Status check';
+        const organismWorkspace = document.getElementById('organism-workspace');
+        try { organismWorkspace.value = localStorage.getItem('zdos.workspace') || ''; } catch { /* Workspace can be entered manually. */ }
+        const organismOutput = document.getElementById('zllm-output');
+        function showOrganismLogin(message) {
+            organismOutput.replaceChildren(document.createTextNode(`${message} `));
+            const link = document.createElement('a'); link.href = '/auth/login'; link.textContent = 'Accedi';
+            organismOutput.append(link);
+        }
+        fetch('/api/v1/organism/status').then(async response => {
+            if (response.status === 401) { showOrganismLogin('Accedi per verificare il gateway Organism.'); return; }
+            const state = await response.json();
+            if (!response.ok) { organismOutput.textContent = state.error === 'service_not_ready' ? 'API non pronta: verifica database e autenticazione.' : `Stato Organism non disponibile (HTTP ${response.status}).`; return; }
+            organismOutput.textContent = state.status === 'configured'
+                ? `Configurato · ${state.model} · ${state.protocol}. Il provider non è stato ancora verificato con una richiesta.`
+                : 'Runtime non configurato. Imposta ORGANISM_API_BASE_URL e ORGANISM_MODEL sul server.';
+        }).catch(() => { organismOutput.textContent = 'API Organism non raggiungibile.'; });
+
+        async function runZllmInference() {
+            const workspace = document.getElementById('organism-workspace').value.trim();
+            const prompt = document.getElementById('zllm-prompt').value.trim();
             const out = document.getElementById('zllm-output');
-            void model;
-            void prompt;
-            out.textContent = 'Inferenza non disponibile: nessun modello è configurato.';
+            const button = document.getElementById('organism-run');
+            if (!workspace || !prompt) { out.textContent = 'Inserisci workspace e richiesta.'; return; }
+            try { localStorage.setItem('zdos.workspace', workspace); } catch { /* Keep the workspace for this request only. */ }
+            button.disabled = true;
+            out.textContent = 'Richiesta inviata al provider configurato…';
+            try {
+                const response = await fetch(`/api/v1/workspaces/${encodeURIComponent(workspace)}/organism/generate`, {
+                    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ prompt })
+                });
+                const result = await response.json();
+                if (response.status === 401) { showOrganismLogin('Autenticazione richiesta.'); return; }
+                if (response.status === 403 || response.status === 404) { out.textContent = 'Workspace non autorizzato o ruolo non abilitato alla generazione.'; return; }
+                if (!response.ok) {
+                    const messages = { 503: 'Provider AI non configurato sul server.', 504: 'Il provider AI non ha risposto entro il limite di tempo.', 502: 'Il provider AI non è raggiungibile o ha restituito una risposta non valida.' };
+                    out.textContent = messages[response.status] || `Generazione non riuscita (HTTP ${response.status}).`;
+                    return;
+                }
+                out.textContent = `[${result.provider} · ${result.model}${result.usage ? ` · ${result.usage.total_tokens} token` : ''}]\n\n${result.output}`;
+            } catch { out.textContent = 'API non raggiungibile. Nessuna risposta generativa confermata.'; }
+            finally { button.disabled = false; }
         }
 
         // --- 2. ZLang Scrypt Maker ---
@@ -657,8 +694,9 @@ module Example {
 
         function copyScryptCode() {
             const code = document.getElementById('scrypt-output').textContent;
-            if (!navigator.clipboard?.writeText) return alert('Clipboard non disponibile. Il testo resta un esempio non eseguibile.');
-            navigator.clipboard.writeText(code).then(() => alert('Testo copiato; è un esempio illustrativo non eseguibile.')).catch(() => alert('Copia non riuscita. Il testo resta non eseguibile.'));
+            const status = document.getElementById('scrypt-copy-status');
+            if (!navigator.clipboard?.writeText) { status.textContent = 'Clipboard non disponibile. Seleziona e copia il testo manualmente.'; return; }
+            navigator.clipboard.writeText(code).then(() => { status.textContent = 'Testo copiato.'; }).catch(() => { status.textContent = 'Copia non riuscita. Seleziona e copia il testo manualmente.'; });
         }
 
         // --- 3. OpenClaw ZAI Dispatcher ---
@@ -738,5 +776,6 @@ module Example {
             for (const id of ['zc-stat-1', 'zc-stat-2', 'zc-stat-3', 'zc-stat-4']) document.getElementById(id).textContent = 'Non configurato';
         }
     </script>
+    <script src="/offline-app.js" defer></script>
 </body>
 </html>

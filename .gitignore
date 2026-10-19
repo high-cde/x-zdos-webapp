@@ -3,4 +3,5 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.oidc-dev.example
 npm-debug.log*

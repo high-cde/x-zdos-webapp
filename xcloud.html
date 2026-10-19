@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/png" href="/devhub24-80.png">
     <title>xCLOUD Enterprise // ZDOS Real Enterprise Suite</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --sidebar-bg: #0f1c2e;
@@ -59,23 +58,27 @@
         </div>
         <div class="sidebar-menu">
             <div class="menu-category">Onboarding & Registrazione</div>
-            <a class="menu-item active" onclick="switchSection('onboarding', this)">📝 Registrazione Account Completa</a>
+            <a class="menu-item" href="/account.html">👤 Account, accesso e registrazione</a>
             
             <div class="menu-category">Collaborazione</div>
-            <a class="menu-item" onclick="switchSection('feed', this)">📢 Feed (Flusso Attività)</a>
-            <a class="menu-item" onclick="switchSection('messenger', this)">💬 Messenger & Chiamate</a>
-            <a class="menu-item" onclick="switchSection('calendar', this)">📅 Calendario</a>
-            <a class="menu-item" onclick="switchSection('drive', this)">📁 Drive Cloud</a>
-            <a class="menu-item" onclick="switchSection('webmail', this)">✉️ Webmail Aziendale</a>
+            <span class="menu-item" aria-disabled="true">📢 Feed · servizio non configurato</span>
+            <span class="menu-item" aria-disabled="true">💬 Messenger · servizio non configurato</span>
+            <span class="menu-item" aria-disabled="true">📅 Calendario · servizio non configurato</span>
+            <span class="menu-item" aria-disabled="true">📁 Drive · servizio non configurato</span>
+            <span class="menu-item" aria-disabled="true">✉️ Webmail · servizio non configurato</span>
             
             <div class="menu-category">CRM & Vendite</div>
-            <a class="menu-item" onclick="switchSection('crm', this)">📊 CRM (Panoramica Lead)</a>
+            <span class="menu-item" aria-disabled="true">📊 CRM · servizio non configurato</span>
             <a class="menu-item" onclick="switchSection('zflow', this)">📋 Incarichi & Progetti (zFLOW)</a>
             
             <div class="menu-category">Sistema ZDOS</div>
             <a href="/wallet.html" class="menu-item">💎 Web3 DSN Wallet</a>
             <a href="/lab.html" class="menu-item">⚡ ZDOS Silicon Lab</a>
-            <a class="menu-item" onclick="switchSection('admin', this)">⚙️ Impostazioni Admin</a>
+            <a href="/downloads.html" class="menu-item">⬇️ Scarica ZDOS Linux</a>
+            <a href="/enet.html" class="menu-item">🌐 Servizi eNET</a>
+            <a href="https://github.com/high-cde/ZDOS" class="menu-item">📦 Repository ZDOS ↗</a>
+            <a href="https://github.com/high-cde/Zlang" class="menu-item">⌘ Zlang / ZLB2 ↗</a>
+            <a href="/admin.html" class="menu-item">⚙️ Console amministrativa workspace</a>
         </div>
     </div>
 
@@ -83,7 +86,7 @@
         <div class="top-header">
             <input type="text" class="search-box" placeholder="Cerca task, lead, documenti su xCLOUD...">
             <div style="display:flex; align-items:center; gap:14px;">
-                <span class="badge-live" style="background:#fef3c7;color:#92400e;">Backend non configurato</span>
+                <a id="backendStatus" class="badge-live" href="/health" style="background:#fef3c7;color:#92400e;text-decoration:none;">Verifica backend…</a>
             </div>
         </div>
 
@@ -108,10 +111,7 @@
             <div class="card">
                 <div class="card-title">💬 Messenger Aziendale zComm</div>
                 <div id="msgList" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; max-height:200px; overflow-y:auto;">Nessun messaggio recente.</div>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" class="form-control" id="msgInput" placeholder="Scrivi un messaggio...">
-                    <button class="btn" style="width:120px;" onclick="sendMessage()">Invia</button>
-                </div>
+                <p>Invio e ricezione messaggi non sono collegati al backend in questa versione.</p>
             </div>
         </div>
 
@@ -151,11 +151,14 @@
         <div id="sec-zflow" class="content-body">
             <div class="card">
                 <div class="card-title">📋 zFLOW Task Engine</div>
-                <div id="taskList" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">API missioni non configurata per questa schermata.</div>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" class="form-control" id="taskInput" placeholder="Nuovo incarico / task...">
-                    <button class="btn" style="width:140px;" onclick="createTask()">Aggiungi Task</button>
-                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:14px;">Missioni salvate nel database del workspace, con ruoli e registro eventi. Inserisci l’ID del workspace al quale sei stato invitato.</p>
+                <div class="form-group"><label class="form-label" for="workspaceId">ID workspace</label><input class="form-control" id="workspaceId" maxlength="100" autocomplete="off" placeholder="es. team-zdos"></div>
+                <button class="btn" style="width:auto;margin-bottom:16px;" onclick="loadTasks()">Apri workspace</button>
+                <div id="taskList" aria-live="polite" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:14px;">Seleziona un workspace per caricare le missioni.</div>
+                <form id="taskForm" style="display:flex;gap:10px;max-width:700px;">
+                    <input type="text" class="form-control" id="taskInput" maxlength="240" required placeholder="Titolo della nuova missione">
+                    <button class="btn" style="width:160px;flex:none;">Crea missione</button>
+                </form>
             </div>
         </div>
 
@@ -169,6 +172,16 @@
     </div>
 
     <script>
+        const workspaceField = document.getElementById('workspaceId');
+        workspaceField.value = new URLSearchParams(location.search).get('workspace') || localStorage.getItem('zdos.workspace') || '';
+        const backendStatus = document.getElementById('backendStatus');
+        fetch('/health').then(async response => {
+            const data = await response.json();
+            backendStatus.textContent = response.ok ? 'API pronta' : `API non pronta · ${data.status || 'configurazione richiesta'}`;
+            backendStatus.style.background = response.ok ? '#dcfce7' : '#fef3c7';
+            backendStatus.style.color = response.ok ? '#166534' : '#92400e';
+        }).catch(() => { backendStatus.textContent = 'API non raggiungibile'; });
+
         function switchSection(secId, element) {
             document.querySelectorAll('.content-body').forEach(el => el.classList.remove('active'));
             document.getElementById('sec-' + secId).classList.add('active');
@@ -186,11 +199,51 @@
             if (node) node.textContent = `${feature}: non configurato.`;
         }
         function loadFeed() { unavailable('feedList', 'Feed'); }
-        function loadMessages() { unavailable('msgList', 'Messaggistica'); }
-        function sendMessage() { unavailable('msgList', 'Invio messaggi'); }
-        function loadTasks() { unavailable('taskList', 'Missioni'); }
-        function createTask() { unavailable('taskList', 'Creazione missioni'); }
+        async function loadTasks() {
+            const workspaceId = workspaceField.value.trim();
+            const node = document.getElementById('taskList');
+            if (!workspaceId) { node.textContent = 'Inserisci l’ID del workspace.'; return; }
+            localStorage.setItem('zdos.workspace', workspaceId);
+            node.textContent = 'Caricamento missioni…';
+            try {
+                const response = await fetch(`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/missions?limit=100`, { headers: { accept: 'application/json' } });
+                const body = await response.json();
+                if (response.status === 401) { node.innerHTML = 'Accedi per continuare. <a href="/auth/login">Accedi con il tuo account</a>'; return; }
+                if (response.status === 404) { node.textContent = 'Workspace non trovato o accesso non autorizzato. Verifica l’ID e l’invito.'; return; }
+                if (!response.ok) { node.textContent = response.status === 503 ? 'Servizio non pronto: configura database e autenticazione OIDC.' : `Impossibile caricare le missioni (HTTP ${response.status}).`; return; }
+                if (!body.data.length) { node.textContent = 'Nessuna missione in questo workspace.'; return; }
+                const list = document.createElement('ul');
+                list.style.cssText = 'list-style:none;padding:0;display:grid;gap:8px';
+                for (const item of body.data) {
+                    const row = document.createElement('li');
+                    row.style.cssText = 'padding:12px;border:1px solid var(--border-color);border-radius:8px;display:flex;justify-content:space-between;gap:12px';
+                    const title = document.createElement('strong'); title.textContent = item.title;
+                    const meta = document.createElement('span'); meta.style.color = 'var(--text-muted)'; meta.textContent = `${item.domain} · ${item.status} · ${item.progress}%`;
+                    row.append(title, meta); list.append(row);
+                }
+                node.replaceChildren(list);
+            } catch { node.textContent = 'API non raggiungibile. Verifica la connessione e riprova.'; }
+        }
+        document.getElementById('taskForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const workspaceId = workspaceField.value.trim();
+            const input = document.getElementById('taskInput');
+            const node = document.getElementById('taskList');
+            if (!workspaceId) { node.textContent = 'Inserisci prima l’ID del workspace.'; return; }
+            try {
+                const response = await fetch(`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/missions`, {
+                    method: 'POST', headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ title: input.value.trim(), domain: 'workspace' })
+                });
+                if (response.status === 401) { node.innerHTML = 'Accedi per creare missioni. <a href="/auth/login">Accedi con il tuo account</a>'; return; }
+                if (response.status === 403) { node.textContent = 'Il tuo ruolo non consente di creare missioni.'; return; }
+                if (!response.ok) { node.textContent = response.status === 503 ? 'Servizio non pronto: configura database e autenticazione OIDC.' : `Creazione non riuscita (HTTP ${response.status}).`; return; }
+                input.value = '';
+                await loadTasks();
+            } catch { node.textContent = 'API non raggiungibile. Nessuna missione è stata confermata.'; }
+        });
         function loadLeads() { unavailable('leadList', 'CRM'); }
     </script>
+    <script src="/offline-app.js" defer></script>
 </body>
 </html>

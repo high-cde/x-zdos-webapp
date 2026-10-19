@@ -2,17 +2,19 @@
 
 ## What this repository is
 
-This is a web application repository with static HTML/CSS/JavaScript pages and an unverified Node.js API foundation. It is not an operating system, execution kernel, blockchain protocol, or production DeFi system. Marketing pages contain historical mock content and must not be treated as evidence of deployed services, balances, performance, security controls, AI capabilities, or on-chain activity.
+This is a Fastify-served web shell with static HTML/CSS/JavaScript pages, an installable offline shell and an API foundation. It is not an operating system, execution kernel, blockchain protocol, or production DeFi system. Pages that describe future services are not evidence of deployed services, balances, performance, AI capabilities, or on-chain activity.
 
 ## Implemented source
 
-- `src/` contains a Fastify API draft for readiness, Auth0 OIDC sessions, workspace scoped mission reads/writes and event creation.
+- `src/` contains a Fastify server for local page/assets, readiness, configurable OIDC sessions, workspace scoped mission reads/writes and event creation.
+- `services/organism.js` provides a provider-agnostic OpenAI-compatible generation gateway behind workspace role checks. It delegates inference and is not a ZLang runtime; see [Organism](ORGANISM.md).
+- `service-worker.js` caches the static shell, refuses cross-origin browser requests and excludes API/auth responses from cache. This is an offline web shell, not a network mesh; see [eNET](ENET.md).
 - `database/migrations/` and `database/schema.sql` describe an initial PostgreSQL model. The migration has not been run in this workspace and has not been verified against PostgreSQL here.
 - `api/openapi.yaml` is a draft API contract. Contract conformance has not been exercised.
 - `config/chain.config.js` hard disables chain integration. No wallet connector, RPC client, contract, signer, token operation, payment, or value transfer is implemented.
 - `config/app.example.json` keeps payment, AI, CRM, automation and DSN flags disabled. Mission Control refers only to the API draft, not a deployed product.
 
-The npm registry could not be resolved during the last installation attempt. Dependencies and `package-lock.json` are absent; API tests that import Fastify cannot currently run. The native Node unit tests and static checks do not establish backend readiness.
+`package-lock.json` and `node_modules` are present in this checkout. API, unit and static tests pass with injected service doubles. Dependency reproducibility, migration execution, real OIDC/provider calls, and LAN deployment have not been verified.
 
 ## Module boundaries
 
@@ -21,7 +23,7 @@ The npm registry could not be resolved during the last installation attempt. Dep
 3. `src/authorization.js`: role permissions and mission state transitions.
 4. `database/migrations/`: versioned persistence changes, applied only through an explicit operator command.
 5. `services/`: optional integrations. They remain disabled and must expose their configuration state rather than pretend work succeeded.
-6. Static pages: presentation only. They must label absent integrations and must not fabricate operational or financial state.
+6. Static pages and PWA shell: public presentation assets only. The service worker must never cache authenticated/API responses or request external origins.
 
 ## Security boundaries
 
@@ -32,9 +34,10 @@ The npm registry could not be resolved during the last installation attempt. Dep
 
 ## Next stages
 
-1. **Offline truth and structure:** accurate status labels, remove fake data and inactive controls, define module contracts and tests.
-2. **Reproducible backend verification:** resolve dependencies when registry access is restored; generate a lockfile; test against disposable local PostgreSQL and mock/staging OIDC.
-3. **Workspace product:** complete membership administration, audit policy, API contract tests and UI integration only after security review.
-4. **Separate chain evaluation:** follow `WEB3_EVALUATION_PLAN.md`. No network or contract is selected or activated by this architecture document.
+1. **Private LAN verification:** install the shell in a browser, confirm offline cache behavior and verify all requests remain on approved internal origins.
+2. **Backend verification:** test migrations and OIDC against disposable local services, then verify workspace isolation.
+3. **Organism integration:** configure a LAN-local model endpoint; native ZLang inference remains a separate research and implementation track.
+4. **eNET/ZComm:** build node discovery and communications only from reviewed source contracts, with no public relay or internet dependency.
+5. **Separate chain evaluation:** follow `WEB3_EVALUATION_PLAN.md`. No chain or value transfer is enabled here.
 
 Each stage requires its own review. Passing local static tests is not production readiness.

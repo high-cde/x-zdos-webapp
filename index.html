@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZDOS Web Platform // Moduli sperimentali</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-base: #020305;
@@ -21,8 +18,8 @@
             --text-primary: #f0f4f8;
             --text-secondary: #8b9bb4;
             --text-muted: #526178;
-            --font-sans: 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-sans: system-ui, sans-serif;
+            --font-mono: ui-monospace, 'Cascadia Code', monospace;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -196,18 +193,22 @@
             <button class="close-drawer" onclick="toggleMenu()">✕</button>
         </div>
         <div class="drawer-links">
-            <a href="https://x-zdos.it/lab.html" onclick="toggleMenu()">🧪 ZDOS-lab-v1 (Research Forge)</a>
-            <a href="https://x-zdos.it/velvet.html" onclick="toggleMenu()">🔥 VelvetHub 18+ Live Club ↗</a>
-            <a href="https://x-zdos.it/specs.html" onclick="toggleMenu()">📊 Specifiche & Prestazioni (zLLM / OpenClaw) ↗</a>
-            <a href="https://x-zdos.it/xcloud.html" onclick="toggleMenu()">💼 Workforce Aziendale (xCLOUD OS) ↗</a>
-            <a href="https://x-zdos.it/wallet.html" target="_blank" onclick="toggleMenu()">💳 DSN Wallet ↗</a>
+            <a href="/lab.html" onclick="toggleMenu()">🧪 ZDOS-lab-v1 (Research Forge)</a>
+            <a href="/velvet.html" onclick="toggleMenu()">🔥 VelvetHub 18+ Live Club ↗</a>
+            <a href="/specs.html" onclick="toggleMenu()">📊 Specifiche & Prestazioni (zLLM / OpenClaw) ↗</a>
+            <a href="/xcloud.html" onclick="toggleMenu()">💼 Workforce Aziendale (xCLOUD OS) ↗</a>
+            <a href="/wallet.html" onclick="toggleMenu()">💳 DSN Wallet ↗</a>
+            <a href="/account.html" onclick="toggleMenu()">👤 Account, accesso e registrazione</a>
+            <a href="/admin.html" onclick="toggleMenu()">⚙️ Workspace e amministrazione</a>
+            <a href="/enet.html" onclick="toggleMenu()">🌐 Servizi eNET</a>
+            <a href="/downloads.html" onclick="toggleMenu()">⬇️ Download ufficiale ZDOS Linux</a>
         </div>
     </div>
 
     <!-- Topbar -->
     <header class="topbar">
         <div class="container topbar-inner">
-            <a href="https://x-zdos.it" class="brand">
+            <a href="/" class="brand">
                 <span class="pulse-dot"></span>
                 <span>ZDOS // SUPREME ENTERPRISE</span>
             </a>
@@ -223,11 +224,13 @@
                     <span class="eyebrow">ZCLIPPER & ZDOS ORGANISM CORE</span>
                     <h1>Moduli web ZDOS in evoluzione.</h1>
                     <p>
-                        Questa copia contiene pagine statiche e una bozza API. Non include un sistema operativo, runtime ZVM, agenti autonomi o servizi operativi verificati.
+                        La piattaforma collega account, workspace zFLOW e gateway Organism configurabile. La distro ZDOS Linux si scarica separatamente dal repository ufficiale.
                     </p>
                     <div class="hero-cta">
-                        <a href="https://x-zdos.it/lab.html" class="btn-primary">ENTRA NEL RESEARCH LAB →</a>
-                        <a href="https://x-zdos.it/velvet.html" class="btn-secondary">VELVETHUB 18+ ↗</a>
+                        <a href="/lab.html" class="btn-primary">ENTRA NEL RESEARCH LAB →</a>
+                        <a href="/velvet.html" class="btn-secondary">VELVETHUB 18+ ↗</a>
+                        <a href="/downloads.html" class="btn-primary">SCARICA ZDOS LINUX ⬇</a>
+                        <a href="/account.html" class="btn-secondary">ACCOUNT / WORKSPACE</a>
                     </div>
                 </div>
                 <div class="neural-box">
@@ -237,10 +240,23 @@
             </div>
         </header>
 
+        <section id="current-projects" class="section">
+            <div class="section-header">
+                <div class="section-title"><span>🧭</span> ZDOS e Zlang oggi</div>
+                <span class="section-tag">PANORAMICA DAI REPOSITORY</span>
+            </div>
+            <div class="grid-cards">
+                <article class="card"><div><span class="badge-pro">ZDOS LINUX · QEMU</span><h3>Distribuzione minimale</h3><p>Immagine Linux x86_64 con BusyBox e initramfs. Le release ufficiali includono ISO e checksum verificabile.</p></div><a href="/downloads.html">Scarica ISO e checksum ↗</a> · <a href="https://github.com/high-cde/ZDOS">Codice sorgente ↗</a></article>
+                <article class="card"><div><span class="badge-pro">BARE METAL · x86_64</span><h3>Kernel e runtime Zlang</h3><p>Un percorso separato integra un runtime ZLB2 nel prototipo bare metal. Il repository descrive build, controlli e prova di boot seriale QEMU/CI.</p></div><a href="https://github.com/high-cde/ZDOS/tree/main/os/x86_64">Codice e verifiche x86_64 ↗</a></article>
+                <article class="card"><div><span class="badge-pro">ZLANG · ZLB2 v2.5</span><h3>Compilatore e bytecode</h3><p>Zlang produce il bytecode usato dal target ZDOS. Il profilo condiviso definisce intestazione, versione, record, opcode e terminazione del programma.</p></div><a href="https://github.com/high-cde/Zlang">Repository Zlang ↗</a></article>
+            </div>
+            <p style="color:var(--text-secondary);margin-top:18px">Questa pagina e la web app locale restano un’interfaccia separata: non mostrano stato live di build o macchine e non avviano il sistema operativo.</p>
+        </section>
+
         <!-- Sezione Specifiche & Prestazioni -->
         <section id="specs" class="section">
             <div class="section-header">
-                <div class="section-title"><span>📊</span> <a href="https://x-zdos.it/specs.html" style="color:inherit; text-decoration:none;">Specifiche & Prestazioni (Apri Console zLLM & OpenClaw ↗)</a></div>
+                <div class="section-title"><span>📊</span> <a href="/specs.html" style="color:inherit; text-decoration:none;">Specifiche & Prestazioni (Apri Console zLLM & OpenClaw ↗)</a></div>
                     <span class="section-tag">STATO IMPLEMENTAZIONE</span>
             </div>
 
@@ -298,7 +314,7 @@
                 <div class="card">
                     <div>
                         <span class="badge-pro">BOZZA API</span>
-                        <h3><a href="https://x-zdos.it/xcloud.html" style="color:inherit; text-decoration:none;">xCLOUD-by-zdos & zclipper ↗</a></h3>
+                        <h3><a href="/xcloud.html" style="color:inherit; text-decoration:none;">xCLOUD-by-zdos & zclipper ↗</a></h3>
                         <p>Il backend contiene route preliminari per missioni ed eventi; dipendenze e servizi non sono verificati.</p>
                     </div>
                     <ul class="feature-list">
@@ -320,7 +336,7 @@
                 <div class="card">
                     <div>
                         <span class="badge-pro">DISATTIVATO</span>
-                        <h3><a href="https://x-zdos.it/wallet.html" style="color:inherit; text-decoration:none;">Interfaccia wallet demo ↗</a></h3>
+                        <h3><a href="/wallet.html" style="color:inherit; text-decoration:none;">Interfaccia wallet demo ↗</a></h3>
                         <p>Nessun wallet, chain, contratto, saldo o trasferimento è configurato.</p>
                     </div>
                     <ul class="feature-list">
@@ -336,10 +352,10 @@
         <div class="container footer-inner">
             <div><strong>ZDOS Supreme Enterprise</strong> · MIT License · Engineered by <strong>high-cde</strong></div>
             <div class="footer-links">
-                <a href="https://x-zdos.it">x-zdos.it</a>
-                <a href="https://x-zdos.it/lab.html">ZDOS-lab-v1 Forge</a>
-                <a href="https://x-zdos.it/velvet.html">VelvetHub 18+ ↗</a>
-                <a href="https://x-zdos.it/wallet.html">DSN Wallet</a>
+                <a href="/">x-zdos.it</a>
+                <a href="/lab.html">ZDOS-lab-v1 Forge</a>
+                <a href="/velvet.html">VelvetHub 18+ ↗</a>
+                <a href="/wallet.html">DSN Wallet</a>
             </div>
         </div>
     </footer>

@@ -1,0 +1,1 @@
+CREATE SCHEMA IF NOT EXISTS keycloak AUTHORIZATION zdos_dev_user;

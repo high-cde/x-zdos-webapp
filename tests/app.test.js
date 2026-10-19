@@ -41,6 +41,10 @@ function makePool({ userId = 'user-1', memberships = [], missions = [], failEven
       if (normalized.startsWith('SELECT u.id AS user_id')) {
         return { rowCount: this.userId ? 1 : 0, rows: this.userId ? [{ user_id: this.userId, email: 'test@example.invalid', display_name: 'Test User' }] : [] };
       }
+      if (normalized.startsWith('DELETE FROM sessions WHERE id_hash=$1')) {
+        this.revokedSessionHash = values[0];
+        return { rowCount: 1, rows: [] };
+      }
       if (normalized.startsWith('SELECT role FROM workspace_memberships')) {
         const membership = this.memberships.find((item) => item.workspace_id === values[0] && item.user_id === values[1]);
         return { rowCount: membership ? 1 : 0, rows: membership ? [{ role: membership.role }] : [] };
@@ -107,9 +111,16 @@ const mission = (id, workspace_id) => ({ id, workspace_id, title: id, domain: 't
 test('missing OIDC config leaves service not ready and API inaccessible', async () => {
   const app = await buildApp({ env: { NODE_ENV: 'test' } });
   try {
+    assert.equal((await app.inject('/')).statusCode, 200);
+    assert.match((await app.inject('/')).headers['content-type'], /text\/html/);
+    assert.match((await app.inject('/')).headers['content-security-policy'], /connect-src 'self'/);
+    assert.equal((await app.inject('/manifest.webmanifest')).statusCode, 200);
+    assert.equal((await app.inject('/service-worker.js')).headers['service-worker-allowed'], '/');
     assert.equal((await app.inject('/health')).statusCode, 503);
     assert.equal((await app.inject('/api/v1/workspaces/acme/missions')).statusCode, 503);
-    assert.equal((await app.inject('/auth/login')).statusCode, 503);
+    const login = await app.inject('/auth/login');
+    assert.equal(login.statusCode, 302);
+    assert.equal(login.headers.location, '/account.html?login=unavailable');
   } finally { await app.close(); }
 });
 
@@ -120,6 +131,50 @@ test('API rejects anonymous requests even when test database and OIDC are inject
     const response = await app.inject('/api/v1/workspaces/acme/missions');
     assert.equal(response.statusCode, 401);
     assert.equal(response.json().error, 'authentication_required');
+  } finally { await app.close(); }
+});
+
+test('session endpoint exposes only the authenticated identity and rejects anonymous callers', async () => {
+  const pool = makePool();
+  const app = await makeAuthedApp(pool);
+  try {
+    const anonymous = await app.inject('/api/v1/session');
+    assert.equal(anonymous.statusCode, 401);
+    assert.deepEqual(anonymous.json(), { error: 'authentication_required' });
+
+    const authenticated = await app.inject({ url: '/api/v1/session', headers: authHeaders });
+    assert.equal(authenticated.statusCode, 200);
+    assert.deepEqual(authenticated.json(), {
+      authenticated: true,
+      user: { id: 'user-1', email: 'test@example.invalid', display_name: 'Test User' }
+    });
+    assert.equal(JSON.stringify(authenticated.json()).includes('test-session'), false);
+    assert.ok(pool.statements.some((sql) => sql.includes('s.expires_at > now()')));
+  } finally { await app.close(); }
+});
+
+test('session endpoint rejects a revoked or unknown session cookie', async () => {
+  const app = await makeAuthedApp(makePool({ userId: null }));
+  try {
+    const response = await app.inject({ url: '/api/v1/session', headers: authHeaders });
+    assert.equal(response.statusCode, 401);
+    assert.deepEqual(response.json(), { error: 'authentication_required' });
+  } finally { await app.close(); }
+});
+
+test('logout rejects cross-origin requests and revokes the session on same-origin requests', async () => {
+  const pool = makePool();
+  const app = await makeAuthedApp(pool);
+  try {
+    const rejected = await app.inject({ method: 'POST', url: '/auth/logout', headers: { cookie: 'xcloud_session=test-session', origin: 'https://attacker.example' } });
+    assert.equal(rejected.statusCode, 403);
+    assert.equal(pool.revokedSessionHash, undefined);
+
+    const response = await app.inject({ method: 'POST', url: '/auth/logout', headers: authHeaders });
+    assert.equal(response.statusCode, 204);
+    assert.match(response.headers['set-cookie'], /Max-Age=0/);
+    assert.equal(typeof pool.revokedSessionHash, 'string');
+    assert.equal(pool.revokedSessionHash.length, 64);
   } finally { await app.close(); }
 });
 
@@ -181,5 +236,51 @@ test('mission and audit event roll back together when event insertion fails', as
     assert.equal(pool.events.length, 0);
     assert.ok(pool.statements.includes('ROLLBACK'));
     assert.equal(pool.released, true);
+  } finally { await app.close(); }
+});
+
+test('Organism requires a configured provider and workspace AI permission', async () => {
+  const pool = makePool({ memberships: [
+    { workspace_id: 'team', user_id: 'user-1', role: 'viewer' },
+    { workspace_id: 'writers', user_id: 'user-1', role: 'member' }
+  ] });
+  let providerCalls = 0;
+  const app = await buildApp({
+    env: { ...testEnv, ORGANISM_API_BASE_URL: 'https://model.example/v1', ORGANISM_MODEL: 'organism-test', ORGANISM_API_KEY: 'test-secret' },
+    pool,
+    oidcClient: testOidc,
+    organismFetch: async (url, options) => {
+      providerCalls++;
+      assert.equal(url, 'https://model.example/v1/chat/completions');
+      assert.equal(options.headers.authorization, 'Bearer test-secret');
+      const payload = JSON.parse(options.body);
+      assert.equal(payload.model, 'organism-test');
+      assert.equal(payload.messages.at(-1).content, 'Scrivi un riepilogo');
+      return new Response(JSON.stringify({ model: 'organism-test', choices: [{ message: { content: 'Risposta generata.' } }], usage: { total_tokens: 18 } }), { status: 200 });
+    }
+  });
+  try {
+    const denied = await app.inject({ method: 'POST', url: '/api/v1/workspaces/team/organism/generate', headers: authHeaders, payload: { prompt: 'Non autorizzato' } });
+    const generated = await app.inject({ method: 'POST', url: '/api/v1/workspaces/writers/organism/generate', headers: authHeaders, payload: { prompt: 'Scrivi un riepilogo' } });
+    assert.equal(denied.statusCode, 403);
+    assert.equal(generated.statusCode, 200);
+    assert.equal(generated.json().provider, 'OpenAI-compatible endpoint');
+    assert.equal(generated.json().output, 'Risposta generata.');
+    assert.equal(generated.json().usage.total_tokens, 18);
+    assert.equal(providerCalls, 1);
+  } finally { await app.close(); }
+});
+
+test('Organism rejects oversized prompts and reports an unconfigured provider without calling it', async () => {
+  const pool = makePool({ memberships: [{ workspace_id: 'writers', user_id: 'user-1', role: 'member' }] });
+  let providerCalls = 0;
+  const app = await buildApp({ env: testEnv, pool, oidcClient: testOidc, organismFetch: async () => { providerCalls++; } });
+  try {
+    const unavailable = await app.inject({ method: 'POST', url: '/api/v1/workspaces/writers/organism/generate', headers: authHeaders, payload: { prompt: 'richiesta' } });
+    const oversized = await app.inject({ method: 'POST', url: '/api/v1/workspaces/writers/organism/generate', headers: authHeaders, payload: { prompt: 'x'.repeat(6001) } });
+    assert.equal(unavailable.statusCode, 503);
+    assert.equal(unavailable.json().error, 'organism_not_configured');
+    assert.equal(oversized.statusCode, 400);
+    assert.equal(providerCalls, 0);
   } finally { await app.close(); }
 });

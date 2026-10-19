@@ -1,8 +1,8 @@
 const permissions = {
   viewer: new Set(['mission:read']),
-  member: new Set(['mission:read', 'mission:write', 'event:write']),
-  manager: new Set(['mission:read', 'mission:write', 'mission:manage', 'event:write']),
-  admin: new Set(['mission:read', 'mission:write', 'mission:manage', 'event:write'])
+  member: new Set(['mission:read', 'mission:write', 'event:write', 'ai:generate']),
+  manager: new Set(['mission:read', 'mission:write', 'mission:manage', 'event:write', 'ai:generate']),
+  admin: new Set(['mission:read', 'mission:write', 'mission:manage', 'event:write', 'ai:generate', 'workspace:admin'])
 };
 
 export function can(role, permission) {

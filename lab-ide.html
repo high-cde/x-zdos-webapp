@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZDOS-lab-v1 // ZLang IDE & GitHub Workspace</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-base: #0f1117;
@@ -61,13 +58,19 @@
 
     <header class="topbar">
         <div style="display: flex; align-items: center; gap: 16px;">
-            <a href="https://x-zdos.it/lab.html">← TORNA AL RESEARCH FORGE</a>
+            <a href="/lab.html">← TORNA AL RESEARCH FORGE</a>
             <span style="color: var(--text-secondary);">ZDOS-lab-v1 // Workspace: <strong style="color: var(--text-primary);">high-cde/ZDOS-lab-v1</strong></span>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <button class="gh-sync-btn" disabled>GitHub sync non configurato</button>
         </div>
     </header>
+
+    <section style="padding:14px 20px;background:rgba(0,240,255,0.06);border-bottom:1px solid var(--border-glass);color:var(--text-secondary);">
+        Ecosistema corrente: <a href="https://github.com/high-cde/ZDOS" style="color:var(--neon-cyan);">ZDOS</a> ·
+        <a href="https://github.com/high-cde/Zlang" style="color:var(--neon-cyan);">Zlang / ZLB2</a>.
+        Il codice in questo editor resta un esempio locale e non viene compilato.
+    </section>
 
     <div class="ide-container">
         <div class="sidebar">

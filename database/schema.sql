@@ -1,4 +1,4 @@
--- Reference DDL for database/migrations/001_initial.js.
+-- Reference DDL for database/migrations/001_initial.js and 002_oidc_self_service_signup.js.
 -- Do not apply this file directly; use the explicit node-pg-migrate command.
 CREATE TABLE workspaces (
   id text PRIMARY KEY,
@@ -64,5 +64,6 @@ CREATE TABLE oidc_transactions (
   state text NOT NULL,
   nonce text NOT NULL,
   code_verifier text NOT NULL,
+  is_signup boolean NOT NULL DEFAULT false,
   expires_at timestamptz NOT NULL
 );

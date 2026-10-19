@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: ZDOS Web API Draft
-  version: 0.2.0
-  description: Unverified workspace-scoped API draft. Authentication is an Auth0 OIDC session cookie; no live service is implied.
+  title: ZDOS eNET Web API
+  version: 0.3.0
+  description: Workspace API served by the local Fastify host. OIDC sessions and provider integrations require operator configuration; this contract does not imply a live deployment.
 servers:
   - url: /
 security:
@@ -15,6 +15,45 @@ paths:
       responses:
         '200': { description: Ready }
         '503': { description: Not ready }
+  /api/v1/organism/status:
+    get:
+      summary: Report whether the server has a generative provider configured
+      responses:
+        '200':
+          description: Configuration state only; it does not verify provider availability
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, model, protocol]
+                properties:
+                  status: { type: string, enum: [configured, not_configured] }
+                  model: { type: string, nullable: true }
+                  protocol: { type: string, nullable: true }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '503': { description: API or authentication is not ready }
+  /api/v1/session:
+    get:
+      summary: Return the current authenticated account
+      responses:
+        '200':
+          description: Current user identity; no session token is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [authenticated, user]
+                properties:
+                  authenticated: { type: boolean, enum: [true] }
+                  user:
+                    type: object
+                    required: [id, email, display_name]
+                    properties:
+                      id: { type: string }
+                      email: { type: string, format: email }
+                      display_name: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '503': { description: Database or OIDC is not ready }
   /auth/login:
     get:
       security: []
@@ -22,6 +61,23 @@ paths:
       responses:
         '302': { description: Redirect to configured OIDC issuer }
         '503': { description: Auth0 or PostgreSQL not configured }
+  /auth/register:
+    get:
+      security: []
+      summary: Begin verified OIDC signup and create a personal workspace when self-service registration is enabled
+      responses:
+        '302': { description: Redirect to configured OIDC signup or account availability page }
+        '503': { description: Authentication unavailable }
+  /auth/registration-status:
+    get:
+      security: []
+      summary: Report whether verified self-service signup is available
+      responses:
+        '200':
+          description: Public availability flag; returns no secrets
+          content:
+            application/json:
+              schema: { type: object, required: [enabled], properties: { enabled: { type: boolean } } }
   /auth/callback:
     get:
       security: []
@@ -31,6 +87,13 @@ paths:
         '400': { description: Invalid OIDC transaction }
         '401': { description: OIDC verification failed }
         '403': { description: Verified email or workspace membership required }
+  /auth/logout:
+    post:
+      security: []
+      summary: Revoke the current server-side session and clear its cookie
+      responses:
+        '204': { description: Session ended }
+        '403': { description: Request origin rejected }
   /auth/logout:
     post:
       security: []
@@ -87,6 +150,68 @@ paths:
               schema: { $ref: '#/components/schemas/Mission' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { description: Insufficient role }
+  /api/v1/admin/workspaces/{workspaceId}/overview:
+    parameters:
+      - $ref: '#/components/parameters/workspaceId'
+    get:
+      summary: Read the administrative overview of a workspace
+      description: Requires the admin membership role. Returns workspace metadata, mission counts, member roster, and the latest 20 audit events.
+      responses:
+        '200':
+          description: Workspace administration data
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [workspace, missions, members, events]
+                properties:
+                  workspace: { type: object }
+                  missions: { type: object, properties: { total: { type: integer }, active: { type: integer }, blocked: { type: integer }, completed: { type: integer } } }
+                  members: { type: array, items: { type: object } }
+                  events: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { description: Admin role required }
+        '404': { description: Workspace not found or caller is not a member }
+  /api/v1/admin/workspaces:
+    get:
+      summary: List workspaces administered by the current caller
+      responses:
+        '200':
+          description: At most 100 workspaces where the caller has the admin role
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { type: array, maxItems: 100, items: { type: object, required: [id, name, slug], properties: { id: { type: string }, name: { type: string }, slug: { type: string } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/admin/workspaces/{workspaceId}/members/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/workspaceId'
+      - name: userId
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      summary: Change a workspace member role
+      description: Requires workspace admin. Changes are serialized per workspace, audited, and cannot remove the last admin.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              additionalProperties: false
+              properties:
+                role: { type: string, enum: [viewer, member, manager, admin] }
+      responses:
+        '200': { description: Membership role saved }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { description: Admin role required }
+        '404': { description: Membership not found }
+        '409': { description: Workspace must retain at least one admin }
   /api/v1/workspaces/{workspaceId}/missions/{missionId}:
     parameters:
       - $ref: '#/components/parameters/workspaceId'
@@ -140,6 +265,46 @@ paths:
         '201': { description: Event recorded }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { description: Insufficient role }
+  /api/v1/workspaces/{workspaceId}/organism/generate:
+    parameters:
+      - $ref: '#/components/parameters/workspaceId'
+    post:
+      summary: Generate text through the configured OpenAI-compatible provider
+      description: Requires a member, manager, or admin role. The provider supplies inference; this endpoint is not native ZLang execution.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              additionalProperties: false
+              properties:
+                prompt: { type: string, minLength: 1, maxLength: 6000 }
+      responses:
+        '200':
+          description: Provider-generated output and reported usage
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [provider, model, output, usage]
+                properties:
+                  provider: { type: string }
+                  model: { type: string }
+                  output: { type: string }
+                  usage:
+                    type: object
+                    nullable: true
+                    properties:
+                      total_tokens: { type: integer }
+        '400': { description: Invalid or empty prompt }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { description: Insufficient workspace role }
+        '404': { description: Workspace not found or caller is not a member }
+        '502': { description: Provider error or invalid provider response }
+        '503': { description: Provider not configured }
+        '504': { description: Provider timeout }
 components:
   securitySchemes:
     sessionCookie:
