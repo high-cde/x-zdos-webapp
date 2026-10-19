@@ -311,3 +311,15 @@ export async function buildApp({ env = process.env, pool: injectedPool, oidcClie
   app.addHook('onClose', async () => { if (pool && !injectedPool) await pool.end(); });
   return app;
 }
+
+// Integrazione endpoint ZLang nativo
+import { compileZLangSource } from './zlang/engine.js';
+fastify.post('/api/zlang/compile', async (request, reply) => {
+    try {
+        const { code } = request.body || {};
+        const result = compileZLangSource(code);
+        return reply.send(result);
+    } catch (err) {
+        return reply.code(400).send({ error: err.message });
+    }
+});
